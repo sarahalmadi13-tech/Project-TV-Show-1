@@ -3,12 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TV Show Project | bezdzenariy</title>
+    <title>TV Show Project | Sarah</title>
     <link href="style.css" rel="stylesheet" />
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   </head>
 
   <body>
+
+    //LEVEL 500: SHOWS LISTING VIEW
+    <div id="showsView">
+      <input type="text" id="showSearch" placeholder="Search shows..." />
+      <div id="showsContainer"></div>
+    </div>
+//LEVEL 500: EPISODES VIEW (hidden at start)
+    <div id="episodesView" style="display:none;">
+    <button id="backToShows">← Back to all shows</button>
+
     <div id="controls">
       <select id="showSelector">
         <option value="">Select a show...</option>
