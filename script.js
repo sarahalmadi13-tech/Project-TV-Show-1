@@ -1,6 +1,8 @@
 // initialize application when DOM is loaded
-function setup() {
-  allEpisodes = getAllEpisodes();
+async function setup() {
+  await setupShowSelector(); // NEW
+  const defaultShowId = document.getElementById("showSelector").value;
+  allEpisodes = await loadEpisodes(defaultShowId);
   makePageForEpisodes(allEpisodes);
   setupSearch();
   setupEpisodeSelector();
