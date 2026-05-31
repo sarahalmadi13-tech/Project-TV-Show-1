@@ -26,7 +26,7 @@ async function loadEpisodes(showId) {
 }
 
 // ---------------------------------------------
-// LEVEL 500: SHOWS LISTING VIEW
+/* LEVEL 500: SHOWS LISTING VIEW */
 // ---------------------------------------------
 async function showShowsListing() {
   const showsView = document.getElementById("showsView");
