@@ -1,11 +1,55 @@
-// initialize application when DOM is loaded
-async function setup() {
-  await setupShowSelector(); // NEW
-  const defaultShowId = document.getElementById("showSelector").value;
-  allEpisodes = await loadEpisodes(defaultShowId);
-  makePageForEpisodes(allEpisodes);
-  setupSearch();
-  setupEpisodeSelector();
+// ---------------------------------------------
+// LEVEL 400: GLOBAL CACHE & SHOW FETCHING
+// ---------------------------------------------
+let showsCache = {}; // stores all shows and episodes per show
+let allEpisodes = []; // will be updated when show changes
+
+async function loadShows() {
+  if (!showsCache.allShows) {
+    const res = await fetch("https://api.tvmaze.com/shows");
+    const data = await res.json();
+
+    // sort alphabetically (case-insensitive)
+    showsCache.allShows = data.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+  }
+  return showsCache.allShows;
+}
+
+async function loadEpisodes(showId) {
+  if (!showsCache[showId]) {
+    const res = await fetch(`https://api.tvmaze.com/shows/${showId}/episodes`);
+    showsCache[showId] = await res.json();
+  }
+  return showsCache[showId];
+}
+
+async function setupShowSelector() {
+  const showSelect = document.getElementById("showSelector");
+  const shows = await loadShows();
+
+  // clear old options (important when switching)
+  showSelect.innerHTML = `<option value="">Select a show...</option>`;
+
+  shows.forEach((show) => {
+    const option = document.createElement("option");
+    option.value = show.id;
+    option.textContent = show.name;
+    showSelect.appendChild(option);
+  });
+
+  // When user selects a show → load episodes
+  showSelect.addEventListener("change", async () => {
+    const showId = showSelect.value;
+    if (!showId) return;
+
+    allEpisodes = await loadEpisodes(showId);
+
+    makePageForEpisodes(allEpisodes);
+    setupEpisodeSelector(); // rebuild episode dropdown
+    resetSearch(); // clear search + match count
+  });
 }
 
 // populate the page with episode cards
@@ -70,12 +114,18 @@ function setupSearch() {
     makePageForEpisodes(filtered);
   });
 }
-
+function resetSearch() {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("matchCount").textContent = "";
+}
 //---------------------------------
 //level 300: Episode selector
 //--------------------------------
 function setupEpisodeSelector() {
   const selector = document.getElementById("episodeSelector");
+
+  // clear old options
+  selector.innerHTML = `<option value="">Select an episode...</option>`;
 
   allEpisodes.forEach((ep) => {
     const season = String(ep.season).padStart(2, "0");
@@ -97,6 +147,24 @@ function setupEpisodeSelector() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   });
+}
+
+// ---------------------------------------------
+// LEVEL 400: NEW setup()
+// ---------------------------------------------
+async function setup() {
+  await setupShowSelector(); // load shows first
+
+  // pick the first show automatically
+  const firstShowId = document.getElementById("showSelector").value;
+
+  if (firstShowId) {
+    allEpisodes = await loadEpisodes(firstShowId);
+    makePageForEpisodes(allEpisodes);
+    setupEpisodeSelector();
+  }
+
+  setupSearch();
 }
 // start the app
 window.onload = setup;
