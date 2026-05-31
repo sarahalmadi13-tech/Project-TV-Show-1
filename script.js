@@ -25,34 +25,101 @@ async function loadEpisodes(showId) {
   return showsCache[showId];
 }
 
-async function setupShowSelector() {
-  const showSelect = document.getElementById("showSelector");
+// ---------------------------------------------
+// LEVEL 500: SHOWS LISTING VIEW
+// ---------------------------------------------
+async function showShowsListing() {
+  const showsView = document.getElementById("showsView");
+  const episodesView = document.getElementById("episodesView");
+
+  showsView.style.display = "block";
+  episodesView.style.display = "none";
+
+  const showsContainer = document.getElementById("showsContainer");
+  showsContainer.innerHTML = "";
+
   const shows = await loadShows();
 
-  // clear old options (important when switching)
-  showSelect.innerHTML = `<option value="">Select a show...</option>`;
-
   shows.forEach((show) => {
-    const option = document.createElement("option");
-    option.value = show.id;
-    option.textContent = show.name;
-    showSelect.appendChild(option);
+    const card = createShowCard(show);
+    showsContainer.appendChild(card);
+  });
+}
+
+// ---------------------------------------------
+// LEVEL 500: CREATE SHOW CARD
+// ---------------------------------------------
+function createShowCard(show) {
+  const card = document.createElement("div");
+  card.classList.add("show-card");
+
+  card.innerHTML = `
+    <h2>${show.name}</h2>
+    <img src="${show.image?.medium || ""}" alt="${show.name}">
+    <p>${show.summary}</p>
+    <p><strong>Genres:</strong> ${show.genres.join(", ")}</p>
+    <p><strong>Status:</strong> ${show.status}</p>
+    <p><strong>Rating:</strong> ${show.rating?.average || "N/A"}</p>
+    <p><strong>Runtime:</strong> ${show.runtime} min</p>
+  `;
+
+  card.addEventListener("click", () => {
+    showEpisodesView(show.id);
   });
 
-  // When user selects a show → load episodes
-  showSelect.addEventListener("change", async () => {
-    const showId = showSelect.value;
-    if (!showId) return;
+  return card;
+}
 
-    allEpisodes = await loadEpisodes(showId);
+// ---------------------------------------------
+// LEVEL 500: SHOW EPISODES VIEW
+// ---------------------------------------------
+async function showEpisodesView(showId) {
+  const showsView = document.getElementById("showsView");
+  const episodesView = document.getElementById("episodesView");
 
-    makePageForEpisodes(allEpisodes);
-    setupEpisodeSelector(); // rebuild episode dropdown
-    resetSearch(); // clear search + match count
+  showsView.style.display = "none";
+  episodesView.style.display = "block";
+
+  allEpisodes = await loadEpisodes(showId);
+
+  makePageForEpisodes(allEpisodes);
+  setupEpisodeSelector();
+  setupSearch();
+}
+
+// ---------------------------------------------
+// LEVEL 500: BACK BUTTON
+// ---------------------------------------------
+function setupBackButton() {
+  const backBtn = document.getElementById("backToShows");
+  backBtn.addEventListener("click", showShowsListing);
+}
+
+// ---------------------------------------------
+// LEVEL 500: SHOW SEARCH
+// ---------------------------------------------
+function setupShowSearch() {
+  const input = document.getElementById("showSearch");
+  const container = document.getElementById("showsContainer");
+
+  input.addEventListener("input", async () => {
+    const term = input.value.toLowerCase();
+    const shows = await loadShows();
+
+    const filtered = shows.filter(
+      (show) =>
+        show.name.toLowerCase().includes(term) ||
+        show.summary.toLowerCase().includes(term) ||
+        show.genres.join(" ").toLowerCase().includes(term),
+    );
+
+    container.innerHTML = "";
+    filtered.forEach((show) => container.appendChild(createShowCard(show)));
   });
 }
 
 // populate the page with episode cards
+//Episode Rendering
 function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
 
@@ -150,21 +217,13 @@ function setupEpisodeSelector() {
 }
 
 // ---------------------------------------------
-// LEVEL 400: NEW setup()
+// LEVEL 500: NEW setup()
 // ---------------------------------------------
 async function setup() {
-  await setupShowSelector(); // load shows first
-
-  // pick the first show automatically
-  const firstShowId = document.getElementById("showSelector").value;
-
-  if (firstShowId) {
-    allEpisodes = await loadEpisodes(firstShowId);
-    makePageForEpisodes(allEpisodes);
-    setupEpisodeSelector();
-  }
-
-  setupSearch();
+  await loadShows();
+  setupShowSearch();
+  setupBackButton();
+  showShowsListing();
 }
 // start the app
 window.onload = setup;
