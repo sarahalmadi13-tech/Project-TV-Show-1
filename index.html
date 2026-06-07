@@ -9,22 +9,31 @@
   </head>
 
   <body>
-    <div id="controls">
-      <input type="text" id="searchInput" placeholder="Search episodes..." />
-      <select id="episodeSelector">
-        <option value="">Select an episode...</option>
-      </select>
-      <p id="matchCount"></p>
+    <!-- SHOWS VIEW -->
+    <div id="shows-view">
+      <h1>TV Shows</h1>
+      <input type="text" id="showSearch" placeholder="Search shows by name, genre, or summary..." />
+      <div id="shows-container"></div>
     </div>
 
-    <div id="root"></div>
+    <!-- EPISODES VIEW -->
+    <div id="episodes-view" style="display: none;">
+      <button id="back-btn">← Back to shows</button>
+
+      <div id="controls">
+        <input type="text" id="searchInput" placeholder="Search episodes..." />
+        <select id="episodeSelector">
+          <option value="">Select an episode...</option>
+        </select>
+        <p id="matchCount"></p>
+      </div>
+
+      <div id="root"></div>
+    </div>
 
     <footer>
       <p>Data from <a href="https://tvmaze.com/">TVMaze.com</a></p>
     </footer>
-
-    <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
-    <script src="episodes.js"></script>
 
     <!-- Loads YOUR javascript code -->
     <script src="script.js"></script>
